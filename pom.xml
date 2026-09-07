@@ -11,7 +11,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.charlottebolos</groupId>
+    <groupId>br.com.charlottebolos</groupId>
     <artifactId>charlotte-bolos</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>charlotte-bolos</name>

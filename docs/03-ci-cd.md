@@ -69,10 +69,10 @@ versões):
 ```
 
 **2. Configuração de teste** em
-`src/test/java/com/charlottebolos/charlottebolos/TestcontainersConfiguration.java`:
+`src/test/java/br/com/charlottebolos/TestcontainersConfiguration.java`:
 
 ```java
-package com.charlottebolos.charlottebolos;
+package br.com.charlottebolos;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;

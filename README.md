@@ -152,7 +152,7 @@ Comece por [01 — Infraestrutura](docs/01-infraestrutura.md).
 ## Estrutura
 
 ```
-src/main/java/com/charlottebolos/charlottebolos/
+src/main/java/br/com/charlottebolos/
 ├── config/       # configurações (beans, CORS, etc.)
 ├── controller/   # endpoints REST
 ├── service/      # regras de negócio
