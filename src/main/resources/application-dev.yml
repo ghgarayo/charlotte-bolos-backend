@@ -1,0 +1,20 @@
+# Perfil de desenvolvimento. Ativado pelo docker-compose.yml
+# (SPRING_PROFILES_ACTIVE=dev) ou manualmente:
+#   mvn spring-boot:run -Dspring-boot.run.profiles=dev
+#
+# So conveniencias de dev. Credenciais NAO vem daqui - vem do .env.
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    # Permite apontar o Flyway para um banco criado na mao, sem historico.
+    baseline-on-migrate: true
+
+logging:
+  level:
+    # Mostra os valores dos parametros nas queries logadas acima.
+    org.hibernate.orm.jdbc.bind: trace

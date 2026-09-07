@@ -1,0 +1,29 @@
+# Perfil de producao. E o PERFIL PADRAO: vale sempre que SPRING_PROFILES_ACTIVE
+# nao for declarado (ver application.yml).
+#
+# Diferenca central em relacao ao base: as credenciais NAO tem valor default.
+# Sem as variaveis definidas a aplicacao nao sobe - o importante e que ela nunca
+# cai silenciosamente no postgres/postgres de desenvolvimento.
+#
+# Observacao sobre o modo da falha: o Spring nao aborta ao encontrar um
+# placeholder sem valor durante o binding de @ConfigurationProperties - ele o
+# mantem literal. Na pratica a falha aparece na conexao, com mensagem pouco
+# obvia (ex.: `UnknownHostException: ${DB_HOST}`). Falha de qualquer forma, mas
+# a validacao com mensagem clara deve ficar na camada de deploy - ver
+# docs/01-infraestrutura.md, decisao D9.
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  flyway:
+    # O schema de producao so evolui por migracao versionada. Se o Flyway nao
+    # reconhecer o estado do banco, o certo e falhar e investigar.
+    baseline-on-migrate: false
