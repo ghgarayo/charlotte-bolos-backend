@@ -1,0 +1,39 @@
+# Configuracao base, comum a todos os ambientes.
+# Regra: o que NAO varia por ambiente mora aqui. O que varia e publico vai para
+# application-<perfil>.yml; o que varia e secreto vem de variavel de ambiente.
+#
+# O perfil padrao e prod: esquecer de declarar o ambiente resulta na
+# configuracao restrita, nunca na permissiva. Dev precisa ser pedido de forma
+# explicita, via SPRING_PROFILES_ACTIVE=dev (o docker-compose.yml ja faz isso)
+# ou `mvn spring-boot:run -Dspring-boot.run.profiles=dev`.
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+
+  application:
+    name: charlotte-bolos
+
+  datasource:
+    # Defaults de conveniencia para desenvolvimento. O perfil prod sobrescreve
+    # estas tres chaves sem default algum, justamente para nao herdar isto aqui.
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:charlotte_bolos}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # Flyway cuida do schema; Hibernate apenas valida se as entidades batem com as tabelas.
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # Adotar um banco pre-existente sem historico e conveniente em dev e
+    # perigoso fora dele: mascara divergencia de schema. Ligado so no perfil dev.
+    baseline-on-migrate: false
+
+server:
+  port: 8080
