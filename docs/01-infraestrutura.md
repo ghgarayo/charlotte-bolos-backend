@@ -275,7 +275,8 @@ Nada além do ambiente local foi definido. A decidir:
 
 1. **Hospedagem** — onde a API e o banco rodam fora da máquina do dev
    (VPS, Railway/Render, cloud gerenciada). Define quase todo o resto.
-2. **CI/CD** — build e testes automáticos por push; publicação da imagem.
+2. **CI/CD** — especificado em [03 — CI/CD](03-ci-cd.md); a CI está pronta
+   para aplicar, a CD depende do item 1.
 3. **Ambientes** — haverá homologação, ou só local e produção?
 4. **Gestão de segredos** — a separação `.env` / `.env.prod` está feita (D9),
    mas arquivo em disco não escala para produção; falta escolher o mecanismo
