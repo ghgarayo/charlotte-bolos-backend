@@ -36,6 +36,11 @@ services:
       # DevTools: polling funciona melhor em volume montado (Windows/macOS)
       SPRING_DEVTOOLS_RESTART_POLL_INTERVAL: 2s
       SPRING_DEVTOOLS_RESTART_QUIET_PERIOD: 1s
+      # Testcontainers: os containers de teste nascem irmaos deste, com portas
+      # publicadas no host - entao o endereco para alcanca-los e o host, e nao o
+      # gateway da rede do compose. So faz sentido rodando de dentro do container;
+      # na CI os testes rodam direto no runner e esta variavel nao existe.
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
     ports:
       - "${APP_PORT:-8080}:8080"
       - "${DEBUG_PORT:-5005}:5005"
@@ -45,6 +50,9 @@ services:
       - .:/app
       # Cache do Maven fora do bind mount, para nao sujar o projeto.
       - maven_repo:/root/.m2
+      # Testcontainers precisa falar com o daemon do Docker do host para subir o
+      # Postgres dos testes. Os containers nascem irmaos deste, nao filhos.
+      - /var/run/docker.sock:/var/run/docker.sock
     command:
       - mvn
       - -B
