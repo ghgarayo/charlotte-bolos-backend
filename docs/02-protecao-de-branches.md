@@ -1,6 +1,7 @@
 # 02 — Proteção de branches no GitHub
 
-> Última atualização: 2026-09-07 · Status: a aplicar (configuração manual no GitHub)
+> Última atualização: 2026-09-07 · Status: aplicado em `main` (ruleset
+> `protect-main`, `Active`) · `develop` ainda sem ruleset
 
 Repositório: `ghgarayo/charlotte-bolos-backend` (público, default branch `main`).
 
@@ -97,6 +98,39 @@ Alternativa equivalente: **Add target → Include by pattern** → `main`.
 
 Botão **Create** no fim da página.
 
+### 6. Estado atual — verificado em 2026-09-07
+
+O ruleset existe, está `Active` e com a **bypass list vazia**, como recomendado
+acima. Consultando `GET /repos/ghgarayo/charlotte-bolos-backend/rulesets`, o que
+está de fato ligado em `main` é:
+
+| Regra | Recomendado acima | Configurado |
+|---|---|---|
+| Restrict deletions | ✅ | ✅ |
+| Block force pushes | ✅ | ✅ |
+| Require a pull request before merging | ✅ | ✅ |
+| ↳ Required approvals | 0 | 0 |
+| ↳ Require all comments resolved | ✅ | ⬜ **divergente** |
+| Require linear history | ✅ | ⬜ **divergente** |
+| Require status checks to pass | ⬜ | ⬜ |
+| Require code coverage | *não previsto* | ✅ mínimo 80% |
+
+Três observações:
+
+- **Require all comments resolved** e **Require linear history** estão
+  desmarcadas, ao contrário do que a tabela da seção 4 recomenda. Sem a segunda,
+  os métodos de merge aceitos são `merge`, `squash` e `rebase` — merge commits
+  entram em `main`, como de fato aconteceu no PR #1.
+- **Require code coverage**, com mínimo de 80%, está ativa e não estava prevista
+  aqui. É uma das regras que rejeitam push direto, com a mensagem *"Code
+  coverage checks require merging via API or UI"*. Note que ela vale **antes** de
+  existir CI reportando cobertura — comportamento diferente de "Require status
+  checks", que a seção acima manda deixar desmarcada justamente por isso.
+- **Require extra approval for unattributed changes** também está ligada:
+  mudanças cuja autoria não bate com quem abriu o PR pedem aprovação extra.
+
+*Em aberto:* decidir se as duas divergências são intencionais ou esquecimento.
+
 ## Secret scanning e push protection
 
 Consequência direta de o repositório ser público (D13): um `.env` commitado por
@@ -140,6 +174,16 @@ travá-la demais só cria atrito.
 
 Ou seja: pode dar push direto em `develop`, mas ninguém apaga nem reescreve.
 
+> ### ⚠️ Não aplicado
+>
+> Em 2026-09-07 **não existe ruleset com alvo `develop`** —
+> `GET /rules/branches/develop` retorna lista vazia. Na prática `develop` aceita
+> force push e deleção hoje; o único ruleset do repositório é `protect-main`.
+>
+> Isso ficou visível quando o histórico das duas branches foi reescrito para
+> remover trailers de commit: o `push --force` em `develop` passou sem
+> resistência, e só o de `main` foi barrado.
+
 ## Como fica o fluxo depois
 
 ```
@@ -159,11 +203,20 @@ Na prática, o `develop → main` passa a ser:
 Merge pela interface do GitHub. O push direto vai falhar assim:
 
 ```
-! [remote rejected] main -> main (protected branch hook declined)
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote:
+remote: - Cannot force-push to this branch
+remote: - Changes must be made through a pull request.
+remote: - Code coverage checks require merging via API or UI.
+! [remote rejected] main -> main (push declined due to repository rule violations)
 ```
 
 Se isso acontecer, o erro está certo — o commit deve ir para `develop` e subir
 por PR.
+
+> A mensagem `protected branch hook declined`, mais conhecida, é a do branch
+> protection **clássico**. Com rulesets o código é `GH013` e o erro lista, uma a
+> uma, quais regras foram violadas — mais útil para diagnosticar.
 
 ## Verificando que funcionou
 
@@ -272,3 +325,4 @@ contornável com `--no-verify` e válido só no clone onde foi configurado.
 |---|---|
 | 2026-09-07 | Versão inicial |
 | 2026-09-07 | D12 (agente de IA não aprova PR) e D13 (repositório público); seção de secret scanning |
+| 2026-09-07 | `protect-main` aplicado; seção "Estado atual" com a configuração real verificada via API; registrado que `develop` segue sem ruleset; mensagem de erro corrigida para o formato `GH013` dos rulesets |
