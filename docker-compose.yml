@@ -1,0 +1,56 @@
+name: charlotte-bolos
+
+services:
+  db:
+    image: postgres:16
+    container_name: charlotte-bolos-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-charlotte_bolos}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - charlotte_bolos_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-charlotte_bolos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      target: dev
+    container_name: charlotte-bolos-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-charlotte_bolos}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      # DevTools: polling funciona melhor em volume montado (Windows/macOS)
+      SPRING_DEVTOOLS_RESTART_POLL_INTERVAL: 2s
+      SPRING_DEVTOOLS_RESTART_QUIET_PERIOD: 1s
+    ports:
+      - "${APP_PORT:-8080}:8080"
+      - "${DEBUG_PORT:-5005}:5005"
+    volumes:
+      # Projeto inteiro montado: alteracoes em src/ e recompilacoes em target/
+      # sao vistas na hora pelo DevTools.
+      - .:/app
+      # Cache do Maven fora do bind mount, para nao sujar o projeto.
+      - maven_repo:/root/.m2
+    command:
+      - mvn
+      - -B
+      - spring-boot:run
+      - -Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+
+volumes:
+  charlotte_bolos_data:
+  maven_repo:
