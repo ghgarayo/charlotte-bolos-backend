@@ -1,0 +1,3 @@
+# Coloque aqui suas migracoes Flyway.
+# Padrao de nome: V<versao>__<descricao>.sql
+# Exemplo: V1__create_bolo_table.sql
