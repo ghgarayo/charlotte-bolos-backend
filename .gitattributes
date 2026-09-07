@@ -1,0 +1,8 @@
+# O projeto e montado dentro de containers Linux: normaliza tudo em LF no
+# repositorio, independente do autocrlf de cada maquina.
+* text=auto eol=lf
+
+*.jar binary
+*.png binary
+*.jpg binary
+*.ico binary
