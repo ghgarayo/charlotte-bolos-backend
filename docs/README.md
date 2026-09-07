@@ -11,9 +11,10 @@ Código muda; o raciocínio por trás dele se perde se não for escrito.
 | Documento | Status | Assunto |
 |---|---|---|
 | [01 — Infraestrutura](01-infraestrutura.md) | ✅ Escrito | Docker, ambientes, banco, portas, variáveis |
-| 02 — Arquitetura | ⬜ A escrever | Camadas, fluxo de request, padrões de código |
-| 03 — Modelo de domínio | ⬜ A escrever | Entidades, relacionamentos, invariantes |
-| 04 — API | ⬜ A escrever | Endpoints, contratos, erros, versionamento |
+| [02 — Proteção de branches](02-protecao-de-branches.md) | ✅ Escrito | Fluxo `develop` → `main`, rulesets do GitHub |
+| 03 — Arquitetura | ⬜ A escrever | Camadas, fluxo de request, padrões de código |
+| 04 — Modelo de domínio | ⬜ A escrever | Entidades, relacionamentos, invariantes |
+| 05 — API | ⬜ A escrever | Endpoints, contratos, erros, versionamento |
 
 ## Convenções
 
