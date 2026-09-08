@@ -13,6 +13,13 @@ spring:
   application:
     name: charlotte-bolos
 
+  # Bundle lido pelo MessageService. Sem estas duas linhas o MessageSource
+  # injetado seria o delegador vazio do contexto e toda chamada lancaria
+  # NoSuchMessageException em runtime.
+  messages:
+    basename: messages
+    encoding: UTF-8
+
   datasource:
     # Defaults de conveniencia para desenvolvimento. O perfil prod sobrescreve
     # estas tres chaves sem default algum, justamente para nao herdar isto aqui.
@@ -20,6 +27,10 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
 
   jpa:
     hibernate:
@@ -37,3 +48,12 @@ spring:
 
 server:
   port: 8080
+
+app:
+  jwt:
+    # Segredo de assinatura HMAC. Sem default: em dev vem do
+    # application-dev.yml, em prod da variavel JWT_SECRET.
+    # Precisa de no minimo 32 caracteres - ver JwtService#signingKey.
+    secret: ${JWT_SECRET}
+    # 24h. Sem refresh token ainda, entao expirar exige novo login.
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}

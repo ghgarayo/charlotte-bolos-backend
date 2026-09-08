@@ -27,3 +27,21 @@ spring:
     # O schema de producao so evolui por migracao versionada. Se o Flyway nao
     # reconhecer o estado do banco, o certo e falhar e investigar.
     baseline-on-migrate: false
+    placeholders:
+      # Credencial do administrador inicial (migracao V2), sem default: a senha
+      # de producao nao pode morar no repositorio, que e publico (D13).
+      # ADMIN_PASSWORD_HASH e o hash BCrypt, nao a senha em texto.
+      admin_email: ${ADMIN_EMAIL}
+      admin_password_hash: ${ADMIN_PASSWORD_HASH}
+
+app:
+  cors:
+    # Dominios do front, separados por virgula. Sem default de proposito: um
+    # default aqui seria um default de seguranca, e o erro passaria despercebido.
+    # Diferente do datasource acima, esta falha aborta o start com mensagem
+    # clara (ver SecurityConfig#corsAllowedOrigins).
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  jwt:
+    # Sem default, como as demais credenciais deste perfil: faltando a
+    # variavel, a aplicacao nao sobe.
+    secret: ${JWT_SECRET}

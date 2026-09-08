@@ -13,8 +13,27 @@ spring:
   flyway:
     # Permite apontar o Flyway para um banco criado na mao, sem historico.
     baseline-on-migrate: true
+    placeholders:
+      # Credencial do admin em desenvolvimento: admin123
+      # Deliberadamente descartavel e fixa no repositorio - so vale aqui.
+      admin_email: admin@charlottebolos.com.br
+      admin_password_hash: $2a$10$bNBTq0b1r7OiSD7kEoOpCOl1QXkMpB45X7mhot79p/QuUTFyTJ1sy
 
 logging:
   level:
     # Mostra os valores dos parametros nas queries logadas acima.
     org.hibernate.orm.jdbc.bind: trace
+
+# Origens do front em desenvolvimento. Cobre os dev servers mais comuns; sobra
+# aqui nao tem custo de seguranca, porque este arquivo so vale no perfil dev.
+#   4200 - Angular CLI
+#   3000 - Create React App / Next.js
+#   5173 - Vite (React, Vue, Svelte)
+# Quando o front estiver definido, deixe so a porta usada.
+app:
+  cors:
+    allowed-origins: http://localhost:4200,http://localhost:3000,http://localhost:5173
+  jwt:
+    # Descartavel e fixo: vale so em desenvolvimento.
+    # 42 caracteres, acima do minimo de 32 exigido pelo HS256.
+    secret: dev-secret-trocar-em-producao-min-32-chars
