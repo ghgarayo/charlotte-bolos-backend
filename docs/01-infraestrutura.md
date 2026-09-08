@@ -87,6 +87,23 @@ mesmos nomes de um `.env` na raiz (opcional — sem ele valem os defaults).
 | `APP_PORT` | `8080` | porta publicada no host |
 | `DEBUG_PORT` | `5005` | porta de debug publicada no host |
 
+Quatro outras existem **apenas no perfil `prod`** e não têm default algum — em
+`dev` os valores vêm do `application-dev.yml`, então não passam pelo `.env`:
+
+| Variável | Para quê |
+|---|---|
+| `CORS_ALLOWED_ORIGINS` | Domínios do front autorizados no navegador |
+| `JWT_SECRET` | Assinatura dos tokens; mínimo 32 caracteres |
+| `ADMIN_EMAIL` | E-mail do administrador criado pela migração `V2` |
+| `ADMIN_PASSWORD_HASH` | Hash BCrypt da senha dele |
+
+Elas seguem a mesma postura do **D9** — faltando qualquer uma, a aplicação não
+sobe. A diferença em relação ao datasource descrito no **D10** é o modo da
+falha: estas abortam o start com mensagem clara (`Could not resolve placeholder`,
+ou erro do Flyway), em vez de virar um `UnknownHostException` na primeira
+conexão. Ver [07 — Segurança](07-seguranca.md) e
+[00 — Progresso](00-progresso.md).
+
 ## Decisões
 
 ### D1 — Aplicação roda em container, não só o banco

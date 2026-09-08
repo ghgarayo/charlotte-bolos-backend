@@ -7,9 +7,11 @@ API REST da confeitaria Charlotte Bolos.
 - Java 21
 - Spring Boot 3.4
 - Spring Web, Spring Data JPA, Validation
+- Spring Security com autenticação por JWT (jjwt)
 - PostgreSQL
 - Flyway (versionamento e migração do banco)
 - Lombok + DevTools
+- Testcontainers nos testes (PostgreSQL real)
 
 ## Pré-requisitos
 
@@ -129,20 +131,70 @@ desenvolvimento local (ver `src/main/resources/application.yml`). O
 | `DB_USER`     | `postgres`       |
 | `DB_PASSWORD` | `postgres`       |
 
+**Só em produção**, e todas **sem default** — faltando qualquer uma, a aplicação
+não sobe:
+
+| Variável      | Para quê         |
+|---------------|------------------|
+| `CORS_ALLOWED_ORIGINS` | Domínios do front, separados por vírgula |
+| `JWT_SECRET`  | Assinatura dos tokens — **mínimo 32 caracteres** |
+| `ADMIN_EMAIL` | E-mail do administrador inicial |
+| `ADMIN_PASSWORD_HASH` | **Hash BCrypt** da senha dele, não a senha |
+
+Em `dev` as quatro têm valor no `application-dev.yml`, então não precisam do
+`.env`. Como gerar o hash de produção: [00 — Progresso](docs/00-progresso.md).
+
 ## Migrações (Flyway)
 
-Coloque os scripts SQL em `src/main/resources/db/migration`, seguindo o
-padrão de nome `V<versão>__<descrição>.sql`. Exemplo:
+Os scripts ficam em `src/main/resources/db/migration`, no padrão
+`V<versão>__<descrição>.sql`. As existentes:
 
 ```
-V1__create_bolo_table.sql
-V2__create_cliente_table.sql
+V1__create_people_and_users.sql   tabelas people e users
+V2__seed_admin_user.sql           administrador inicial
 ```
 
 O Flyway roda as migrações automaticamente ao iniciar a aplicação.
 Como `spring.jpa.hibernate.ddl-auto=validate`, o schema é controlado
 apenas pelas migrações — o Hibernate só confere se as entidades batem
 com as tabelas.
+
+> Migração já aplicada **não deve ser editada**: o Flyway guarda um checksum e
+> recusa o start se o arquivo mudar. Corrija com uma nova versão. (A `V1` foi
+> alterada uma vez, antes de qualquer implantação; se o seu banco de dev acusar
+> divergência, recrie-o com `docker compose down -v`.)
+
+## Autenticação
+
+Único endpoint hoje. Em `dev`, o administrador vem do seed da `V2`:
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email": "admin@charlottebolos.com.br", "password": "admin123"}'
+```
+
+A resposta traz o token dentro do envelope padrão da API:
+
+```json
+{
+  "success": true,
+  "message": "Autenticado com sucesso",
+  "data": { "token": "eyJ...", "expiresInMs": 86400000,
+            "email": "admin@charlottebolos.com.br",
+            "role": "ADMIN", "fullName": "Admin Charlotte" }
+}
+```
+
+Use-o nas demais chamadas:
+
+```bash
+curl http://localhost:8080/api/... -H 'Authorization: Bearer eyJ...'
+```
+
+Sem token, ou com token inválido ou expirado, a API responde **401**. Autenticado
+mas sem permissão, **403**. Detalhes em
+[07 — Segurança](docs/07-seguranca.md).
 
 ## Documentação
 
@@ -153,10 +205,12 @@ Comece por [01 — Infraestrutura](docs/01-infraestrutura.md).
 
 ```
 src/main/java/br/com/charlottebolos/
-├── config/       # configurações (beans, CORS, etc.)
+├── config/       # configurações (beans, CORS, segurança, JWT)
 ├── controller/   # endpoints REST
-├── service/      # regras de negócio
+├── service/      # regras de negócio (interface + impl/)
 ├── repository/   # interfaces Spring Data JPA
 ├── model/        # entidades JPA
-└── dto/          # objetos de transferência (request/response)
+├── dto/          # objetos de transferência (request/response)
+├── exception/    # GlobalExceptionHandler
+└── shared/       # o que atravessa camadas (BaseEntity, ApiResponse)
 ```
